@@ -1,0 +1,42 @@
+@media (max-width: 500px) {
+  .page-meta {
+    .meta-item {
+      display: inline-block;
+      vertical-align: top;
+    }
+    .last-updated {
+      width: 180px;
+    }
+    .contributors {
+      width: calc(100% - 190px);
+      float: right;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+
+  .page-nav {
+    .inner {
+      span {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 49%;
+        display: inline-block;
+      }
+      .next {
+        text-align: right;
+      }
+    }
+  }
+}
+
+#page-toc {
+  a {
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
