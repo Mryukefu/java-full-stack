@@ -25,6 +25,7 @@ module.exports = {
     //     link: ''
     //   }
     // ],
+
     sidebar: {
       '/java/': [
         {
@@ -39,6 +40,7 @@ module.exports = {
               link: '/java/java-basic/java-basic-class',
             },
           ],
+
         },
         {
           text: '日期框架',
@@ -89,12 +91,16 @@ module.exports = {
           text: 'juc并发',
           children: [
             {
-              text: '概述',
-              link: '/java/java-juc/java-juc-summary',
+              text: '线程基础',
+              link: '/java/java-juc/java-juc-base',
             },
             {
-              text: '参照',
-              link: '/java/java-juc/java-juc-summary1',
+              text: '线程同步锁',
+              link: '/java/java-juc/java-juc-sys',
+            },
+            {
+              text: '线程全部',
+              link: '/java/java-juc/java-juc-all',
             },
           ],
 

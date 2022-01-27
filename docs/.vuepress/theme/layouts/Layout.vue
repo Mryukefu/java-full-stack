@@ -1,9 +1,9 @@
 <template>
   <div
-    class="theme-container"
-    :class="containerClass"
-    @touchstart="onTouchStart"
-    @touchend="onTouchEnd"
+          class="theme-container"
+          :class="containerClass"
+          @touchstart="onTouchStart"
+          @touchend="onTouchEnd"
   >
     <slot name="navbar">
       <Navbar v-if="shouldShowNavbar" @toggle-sidebar="toggleSidebar">
@@ -11,7 +11,7 @@
           <slot name="navbar-before" />
         </template>
         <template #after>
-         <!-- <LoginUser />-->
+          <!--<LoginUser />-->
           <slot name="navbar-after" />
         </template>
       </Navbar>
@@ -36,11 +36,11 @@
       <Home v-if="frontmatter.home" />
 
       <Transition
-        v-else
-        name="fade-slide-y"
-        mode="out-in"
-        @before-enter="onBeforeEnter"
-        @before-leave="onBeforeLeave"
+              v-else
+              name="fade-slide-y"
+              mode="out-in"
+              @before-enter="onBeforeEnter"
+              @before-leave="onBeforeLeave"
       >
         <Page :key="page.path">
 
@@ -50,12 +50,12 @@
           <template #bottom>
             <slot name="page-bottom" />
             <!-- 用户评论 -->
-            <UserComment 
-              get-list-url="http://127.0.0.1:8000/comments"
-              :params="{}"
-              publish-url="http://127.0.0.1:8000/comments"
-              :user="{username: 'test-001', avatar: '/images/u.jpeg'}"
-            />
+          <!--  <UserComment
+                    get-list-url="http://127.0.0.1:8000/comments"
+                    :params="{}"
+                    publish-url="http://127.0.0.1:8000/comments"
+                    :user="{username: 'test-001', avatar: '/images/u.jpeg'}"
+            />-->
           </template>
         </Page>
       </Transition>
@@ -64,74 +64,106 @@
 </template>
 
 <script setup lang="ts">
-import { usePageData, usePageFrontmatter } from '@vuepress/client'
-import { computed, onMounted, onUnmounted, ref, Transition } from 'vue'
-import { useRouter } from 'vue-router'
-import type { DefaultThemePageFrontmatter } from '@vuepress/theme-default/lib/client/../shared'
-import Home from '@vuepress/theme-default/lib/client/components/Home.vue'
-import Navbar from '@vuepress/theme-default/lib/client/components/Navbar.vue'
-import Page from '@vuepress/theme-default/lib/client/components/Page.vue'
-import Sidebar from '@vuepress/theme-default/lib/client/components/Sidebar.vue'
-import LoginUser from './LoginUser'
-import RightToc from './RightToc'
-import {
-  useScrollPromise,
-  useSidebarItems,
-  useThemeLocaleData,
-} from '@vuepress/theme-default/lib/client/composables'
-const page = usePageData()
-const frontmatter = usePageFrontmatter<DefaultThemePageFrontmatter>()
-const themeLocale = useThemeLocaleData()
-// navbar
-const shouldShowNavbar = computed(
-  () => frontmatter.value.navbar !== false && themeLocale.value.navbar !== false
-)
-// sidebar
-const sidebarItems = useSidebarItems()
-const isSidebarOpen = ref(false)
-const toggleSidebar = (to?: boolean): void => {
-  isSidebarOpen.value = typeof to === 'boolean' ? to : !isSidebarOpen.value
-}
-const touchStart = { x: 0, y: 0 }
-const onTouchStart = (e): void => {
-  touchStart.x = e.changedTouches[0].clientX
-  touchStart.y = e.changedTouches[0].clientY
-}
-const onTouchEnd = (e): void => {
-  const dx = e.changedTouches[0].clientX - touchStart.x
-  const dy = e.changedTouches[0].clientY - touchStart.y
-  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
-    if (dx > 0 && touchStart.x <= 80) {
-      toggleSidebar(true)
-    } else {
-      toggleSidebar(false)
+  import { usePageData, usePageFrontmatter } from '@vuepress/client'
+  import { computed, onMounted, onUnmounted, ref, Transition } from 'vue'
+  import { useRouter } from 'vue-router'
+  // import Vue from 'vue'
+  import type { DefaultThemePageFrontmatter } from '@vuepress/theme-default/lib/client/../shared'
+  import Home from '@vuepress/theme-default/lib/client/components/Home.vue'
+  import Navbar from '@vuepress/theme-default/lib/client/components/Navbar.vue'
+  import Page from '@vuepress/theme-default/lib/client/components/Page.vue'
+  import Sidebar from '@vuepress/theme-default/lib/client/components/Sidebar.vue'
+  /*import LoginUser from './LoginUser'*/
+  import RightToc from './RightToc'
+  /*import UserComment from './Comment'*/
+  import {
+    useScrollPromise,
+    useSidebarItems,
+    useThemeLocaleData,
+  } from '@vuepress/theme-default/lib/client/composables'
+  const page = usePageData()
+  const frontmatter = usePageFrontmatter<DefaultThemePageFrontmatter>()
+  const themeLocale = useThemeLocaleData()
+  // navbar
+  const shouldShowNavbar = computed(
+          () => frontmatter.value.navbar !== false && themeLocale.value.navbar !== false
+  )
+  // sidebar
+  const sidebarItems = useSidebarItems()
+  const isSidebarOpen = ref(false)
+  const toggleSidebar = (to?: boolean): void => {
+    isSidebarOpen.value = typeof to === 'boolean' ? to : !isSidebarOpen.value
+  }
+  const touchStart = { x: 0, y: 0 }
+  const onTouchStart = (e): void => {
+    touchStart.x = e.changedTouches[0].clientX
+    touchStart.y = e.changedTouches[0].clientY
+  }
+  const onTouchEnd = (e): void => {
+    const dx = e.changedTouches[0].clientX - touchStart.x
+    const dy = e.changedTouches[0].clientY - touchStart.y
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx > 0 && touchStart.x <= 80) {
+        toggleSidebar(true)
+      } else {
+        toggleSidebar(false)
+      }
     }
   }
-}
-// classes
-const containerClass = computed(() => [
-  {
-    'no-navbar': !shouldShowNavbar.value,
-    'no-sidebar': !sidebarItems.value.length,
-    'sidebar-open': isSidebarOpen.value,
-  },
-  frontmatter.value.pageClass,
-])
-// close sidebar after navigation
-let unregisterRouterHook
-onMounted(() => {
-  const router = useRouter()
-  unregisterRouterHook = router.afterEach(() => {
-    toggleSidebar(false)
-  })
-})
-onUnmounted(() => {
-  unregisterRouterHook()
+  // classes
+  const containerClass = computed(() => [
+    {
+      'no-navbar': !shouldShowNavbar.value,
+      'no-sidebar': !sidebarItems.value.length,
+      'sidebar-open': isSidebarOpen.value,
+    },
+    frontmatter.value.pageClass,
+  ])
+  // close sidebar after navigation
+  let unregisterRouterHook
+  onMounted(() => {
+    const router = useRouter()
+    unregisterRouterHook = router.afterEach(() => {
+      toggleSidebar(false)
+    })
 
-  let toc = document.querySelector('.table-of-contents');
-})
-// handle scrollBehavior with transition
-const scrollPromise = useScrollPromise()
-const onBeforeEnter = scrollPromise.resolve
-const onBeforeLeave = scrollPromise.pending
+    let toc = document.querySelector('.table-of-contents')
+    let tocRight = document.getElementById('page-toc')
+    // 根据路由渲染右侧目录
+    function renderTocRight() {
+
+      let timer = null
+      clearInterval(timer)
+      let testContent = toc.textContent
+      timer = setInterval(() => {
+        toc = document.querySelector('.table-of-contents')
+
+        if (toc){
+          let curContent = toc.textContent
+          if (curContent !== testContent) {
+            testContent = curContent
+            tocRight.innerHTML = toc ? toc.innerHTML : ''
+            tocRight.style.display = 'block'
+            clearInterval(timer)
+          }
+        } else {
+          tocRight.style.display = 'none'
+        }
+      }, 100)
+    }
+    // renderTocRight()
+    tocRight.innerHTML = toc ? toc.innerHTML : ''
+    router.afterEach(() => {
+      renderTocRight()
+    })
+  })
+  onUnmounted(() => {
+    unregisterRouterHook()
+
+    let toc = document.querySelector('.table-of-contents');
+  })
+  // handle scrollBehavior with transition
+  const scrollPromise = useScrollPromise()
+  const onBeforeEnter = scrollPromise.resolve
+  const onBeforeLeave = scrollPromise.pending
 </script>
