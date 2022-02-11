@@ -39,6 +39,10 @@ module.exports = {
               text: '常见基础类',
               link: '/java/java-basic/java-basic-class',
             },
+            {
+              text: '泛型',
+              link: '/java/java-basic/java-basic-generic',
+            },
           ],
 
         },
