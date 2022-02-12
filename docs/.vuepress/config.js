@@ -40,8 +40,12 @@ module.exports = {
               link: '/java/java-basic/java-basic-class',
             },
             {
-              text: '泛型',
+              text: '泛型机制',
               link: '/java/java-basic/java-basic-generic',
+            },
+            {
+              text: '注解机制',
+              link: '/java/java-basic/java-basic-annotation',
             },
           ],
 

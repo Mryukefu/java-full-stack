@@ -160,8 +160,6 @@ public class demo1{
 ```
 2.下限
 ```java
-著作权归https://pdai.tech所有。
-链接：https://www.pdai.tech/md/java/basic/java-basic-x-generic.html
 
 class Info<T>{
     private T var ;        // 定义泛型变量
@@ -244,12 +242,173 @@ public class Client {
    ### 泛型数组
    
   ## 深入理解泛型
-   ### 如何理解Java中的泛型是伪泛型？泛型中类型擦除
-   ### 泛型接口
-   ### 泛型方法
-   ### 泛型的上下限
-   ### 泛型数组
+  ::: warning 
+  我们通过泛型背后的类型擦除以及相关的问题来进一步理解泛型
+  :::
+  * 泛型的类型擦除原则是<br/>
+     1.消除类型参数声明，即删除<>及其包围的部分<br/>
+     2.根据类型参数的上下界推断并替换所有的类型参数为原生态类型：如果类型参数是无限制通配符或没有上下界限定则替换为Object，
+     如果存在上下界限定则根据子类替换原则取类型参数的最左边限定类型（即父类）<br/>
+     3.为了保证类型安全，必要时插入强制类型转换代码<br/>
+     4.自动产生“桥接方法”以保证擦除类型后的代码仍然具有泛型的“多态性”<br/>
+  * 那么如何进行擦除的呢 主要分为  无限制类型擦除，有限制类型擦除 两种
+  * 擦除类定义中的类型参数 - 无限制类型擦除
+        当类定义中的类型参数没有任何限制时，在类型擦除中直接被替换为Object，即形如&lt;T&gt;和&lt;?&gt;的类型参数都被替换为Object     
+   <img src="/static/dist/images/java-basic-generic-1.png" width="100%">
+   * 擦除类定义中的类型参数 - 有限制类型擦除
+   <img src="/static/dist/images/java-basic-generic-2.png" width="100%">
+   * 擦除方法定义中的类型参数
+   <img src="/static/dist/images/java-basic-generic-3.png" width="100%">
+   ### 伪泛型之泛型擦除
+   ::: warning 
+    Java泛型这个特性是从JDK 1.5才开始加入的，因此为了兼容之前的版本，Java泛型的实现采取了“伪泛型”的策略，即Java在语法上支持泛型，
+    但是在编译阶段会进行所谓的“类型擦除”（Type Erasure），将所有的泛型表示（尖括号中的内容）都替换为具体的类型（其对应的原生态类型），
+    就像完全没有泛型一样。理解类型擦除对于用好泛型是很有帮助的，尤其是一些看起来“疑难杂症”的问题，弄明白了类型擦除也就迎刃而解了。
+   :::
+   
+     
+   ### 泛型的编译期检查
+   * Java编译器是通过先检查代码中泛型的类型，然后在进行类型擦除，再进行编译。
+   ```java
+public static  void main(String[] args) {  
+
+    ArrayList<String> list = new ArrayList<String>();  
+    list.add("123");  
+    list.add(123);//编译错误  
+}
   
+   ```
+   ### 泛型多态之桥接方法
+   ::: warning
+   类型擦除会造成多态的冲突，而JVM解决方法就是桥接方法。
+   :::
+   * 现在有这样一个泛型类
+   ```java
+class Pair<T> {  
+
+    private T value;  
+
+    public T getValue() {  
+        return value;  
+    }  
+
+    public void setValue(T value) {  
+        this.value = value;  
+    }  
+}
+
+   ```
+* 然后我们想要一个子类继承它。 
+```java
+class DateInter extends Pair<Date> {  
+
+    @Override  
+    public void setValue(Date value) {  
+        super.setValue(value);  
+    }  
+
+    @Override  
+    public Date getValue() {  
+        return super.getValue();  
+    }  
+}
+
+
+   ```
+* 在这个子类中，我们设定父类的泛型类型为Pair&lt;Date&gt;，在子类中，我们覆盖了父类的两个方法，我们的原意是这样的：将父类的泛型类型限定为Date，那么父类里面的两个方法的参数都为Date类型。
+ ```java
+public Date getValue() {  
+    return value;  
+}  
+
+public void setValue(Date value) {  
+    this.value = value;  
+}
+
+
+   ```
+  * 所以，我们在子类中重写这两个方法一点问题也没有，实际上，从他们的@Override标签中也可以看到，一点问题也没有。
+  实际上是这样的吗？ 分析：实际上，类型擦除后，父类的的泛型类型全部变为了原始类型Object，所以父类编译之后会变成下面的样子：
+ ```java
+class Pair {  
+    private Object value;  
+
+    public Object getValue() {  
+        return value;  
+    }  
+
+    public void setValue(Object  value) {  
+        this.value = value;  
+    }  
+} 
+
+   ```
+* 再看子类的两个重写的方法的类型：
+```java
+@Override  
+public void setValue(Date value) {  
+    super.setValue(value);  
+}  
+@Override  
+public Date getValue() {  
+    return super.getValue();  
+}
+```
+* 先来分析setValue方法，父类的类型是Object，而子类的类型是Date，参数类型不一样，这如果实在普通的继承关系中，根本就不会是重写，而是重载。 我们在一个main方法测试一下：
+```java
+public static void main(String[] args) throws ClassNotFoundException {  
+        DateInter dateInter = new DateInter();  
+        dateInter.setValue(new Date());                  
+        dateInter.setValue(new Object()); //编译错误  根本就没有这样的一个子类继承自父类的Object类型参数的方法
+}
+
+```
+* 如果是重载，那么子类中两个setValue方法，一个是参数Object类型，一个是Date类型，可是我们发现，根本就没有这样的一个子类继承自父类的Object类型参数的方法。所以说，却是是重写了，而不是重载了。
+
+```java
+class com.tao.test.DateInter extends com.tao.test.Pair<java.util.Date> {  
+  com.tao.test.DateInter();  
+    Code:  
+       0: aload_0  
+       1: invokespecial #8                  // Method com/tao/test/Pair."<init>":()V  
+       4: return  
+
+  public void setValue(java.util.Date);  //我们重写的setValue方法  
+    Code:  
+       0: aload_0  
+       1: aload_1  
+       2: invokespecial #16                 // Method com/tao/test/Pair.setValue:(Ljava/lang/Object;)V  
+       5: return  
+
+  public java.util.Date getValue();    //我们重写的getValue方法  
+    Code:  
+       0: aload_0  
+       1: invokespecial #23                 // Method com/tao/test/Pair.getValue:()Ljava/lang/Object;  
+       4: checkcast     #26                 // class java/util/Date  
+       7: areturn  
+
+  public java.lang.Object getValue();     //编译时由编译器生成的巧方法  
+    Code:  
+       0: aload_0  
+       1: invokevirtual #28                 // Method getValue:()Ljava/util/Date 去调用我们重写的getValue方法;  
+       4: areturn  
+
+  public void setValue(java.lang.Object);   //编译时由编译器生成的巧方法  
+    Code:  
+       0: aload_0  
+       1: aload_1  
+       2: checkcast     #26                 // class java/util/Date  
+       5: invokevirtual #30                 // Method setValue:(Ljava/util/Date; 去调用我们重写的setValue方法)V  
+       8: return  
+}
+
+```
+* 从编译的结果来看，我们本意重写setValue和getValue方法的子类，竟然有4个方法，其实不用惊奇，最后的两个方法，就是编译器自己生成的桥方法。
+可以看到桥方法的参数类型都是Object，也就是说，子类中真正覆盖父类两个方法的就是这两个我们看不到的桥方法。
+而打在我们自己定义的setvalue和getValue方法上面的@Oveerride只不过是假象。而桥方法的内部实现，就只是去调用我们自己重写的那两个方法。 
+所以，虚拟机巧妙的使用了桥方法，来解决了类型擦除和多态的冲突。 不过，要提到一点，这里面的setValue和getValue这两个桥方法的意义又有不同。 
+setValue方法是为了解决类型擦除与多态之间的冲突。 而getValue却有普遍的意义，怎么说呢，如果这是一个普通的继承关系
+
     
        
  
